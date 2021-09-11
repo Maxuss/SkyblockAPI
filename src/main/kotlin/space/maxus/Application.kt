@@ -1,13 +1,19 @@
+@file:Suppress("DeferredResultUnused")
+
 package space.maxus
 
 import io.ktor.application.*
+import io.ktor.client.utils.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.netty.*
+import io.ktor.util.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import space.maxus.api.*
 import space.maxus.json.JsonConverter
@@ -15,10 +21,15 @@ import space.maxus.util.Pages
 import space.maxus.util.Security
 import java.util.*
 
-fun main(args: Array<String>) {
+@OptIn(InternalAPI::class)
+val thread = Dispatchers.clientDispatcher(1, "SbAPI")
+
+suspend fun main(args: Array<String>) {
     val example = Key.generate(UUID.randomUUID())
     println("Example key: ${example.value}")
-    EngineMain.main(args)
+    coroutineScope {
+        async { EngineMain.main(args) }
+    }
 }
 
 fun Application.module() {
