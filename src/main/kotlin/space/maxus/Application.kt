@@ -55,7 +55,8 @@ fun Application.module() {
                             "Endpoint not found: ${call.request.uri}"
                         )
                     ),
-                    ContentType.Application.Json
+                    ContentType.Application.Json,
+                    status = HttpStatusCode.NotFound
                 )
             }
         }
@@ -69,7 +70,8 @@ fun Application.module() {
                             "Unknown internal error occurred"
                         )
                     ),
-                    ContentType.Application.Json
+                    ContentType.Application.Json,
+                    status = HttpStatusCode.InternalServerError
                 )
             }
         }
@@ -80,7 +82,8 @@ fun Application.module() {
             withContext(Dispatchers.Default) {
                 call.respondText(
                     endpoint(HeaderEndpoint(200, "SkyblockSketchpad API v1")),
-                    contentType = ContentType.Application.Json
+                    contentType = ContentType.Application.Json,
+                    status = HttpStatusCode.OK
                 )
             }
         }
@@ -103,7 +106,7 @@ fun Application.module() {
                 val ep = Security.validateKey(call, UsersEndpoint(200, "All users that ever been on server"))
                 call.respondText(
                     endpoint(ep),
-                    contentType = ContentType.Application.Json
+                    contentType = ContentType.Application.Json,
                 )
             }
         }
@@ -118,7 +121,7 @@ fun Application.module() {
                 )
                 call.respondText(
                     endpoint(ep),
-                    contentType = ContentType.Application.Json
+                    contentType = ContentType.Application.Json,
                 )
             }
         }

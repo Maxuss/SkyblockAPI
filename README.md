@@ -9,6 +9,7 @@ Each endpoint requires API key that you can get by doing /genkey on your Skybloc
 Example of request with key:
 ```http
 GET http:<server ip>:8080/users?key=<api key>
+Content-Type: application/json
 ```
 
 There are several endpoints for the api.
