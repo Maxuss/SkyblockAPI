@@ -21,13 +21,7 @@ data class PlayerEndpoint(
     init {
         val p = Bukkit.getOfflinePlayer(player)
         if(!p.hasPlayedBefore()) {
-            firstJoin = -1
-            lastJoin = -1
-            online = false
-            name = p.name ?: "undefined"
-            deaths = 0
-            maxDamage = .0
-            uuid = p.uniqueId
+            throw ExceptionInInitializerError("Exit")
         } else {
             uuid = p.uniqueId
             name = p.name ?: "undefined"

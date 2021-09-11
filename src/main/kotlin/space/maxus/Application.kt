@@ -21,9 +21,6 @@ import space.maxus.util.Pages
 import space.maxus.util.Security
 import java.util.*
 
-@OptIn(InternalAPI::class)
-val thread = Dispatchers.clientDispatcher(1, "SbAPI")
-
 suspend fun main(args: Array<String>) {
     val example = Key.generate(UUID.randomUUID())
     println("Example key: ${example.value}")
@@ -115,9 +112,34 @@ fun Application.module() {
     routing {
         get("/api/users/{username}") {
             withContext(Dispatchers.Default) {
+                val pep = try {
+                    PlayerEndpoint(200, "Player Information", call.parameters["username"] ?: "undefined");
+                } catch(e: ExceptionInInitializerError) {
+                    ErrorEndpoint(404, "PLAYER_NOT_JOINED_BEFORE", "This player has not yet joined your server!")
+                }
                 val ep = Security.validateKey(
                     call,
-                    PlayerEndpoint(200, "Player information", call.parameters["username"] ?: "undefined")
+                    pep
+                )
+                call.respondText(
+                    endpoint(ep),
+                    contentType = ContentType.Application.Json,
+                )
+            }
+        }
+    }
+
+    routing {
+        get("/api/slayers/{username}") {
+            withContext(Dispatchers.Default) {
+                val pep = try {
+                    SlayerEndpoint.SlayerEndpoint(200, "Player's Slayer Data", call.parameters["username"] ?: "undefined")
+                } catch(e: ExceptionInInitializerError) {
+                    ErrorEndpoint(404, "PLAYER_NOT_DONE_SLAYERS", "This player has not yet done any slayers!")
+                }
+                val ep = Security.validateKey(
+                    call,
+                    pep
                 )
                 call.respondText(
                     endpoint(ep),
