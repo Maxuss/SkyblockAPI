@@ -46,29 +46,42 @@ data class PlayerEndpoint(
     var skills: PlayerSkills? = null
 
     companion object {
-        suspend fun init(code: Int, message: String, player: String) : PlayerEndpoint {
+        suspend fun init(code: Int, message: String, player: String) : Endpoint {
             return coroutineScope {
                 async {
-                    println("Started getting endpoint!")
-                    @Suppress("DEPRECATION") val p = Bukkit.getOfflinePlayer(player)
-                    if(!p.hasPlayedBefore() || p.player == null) {
-                        println("Player didn't play before!")
-                        throw ExceptionInInitializerError("Exit")
+                    try {
+                        println("Started getting endpoint!")
+                        @Suppress("DEPRECATION") val p = Bukkit.getOfflinePlayer(player)
+                        if (!p.hasPlayedBefore() || p.player == null) {
+                            println("Player didn't play before!")
+                            throw ExceptionInInitializerError("Exit")
+                        }
+                        println("58")
+                        val pl = p.player!!
+                        val ep = PlayerEndpoint(code, message, player)
+                        println("After getting endpoint")
+                        ep.firstJoin = pl.firstPlayed
+                        ep.lastJoin = pl.lastLogin
+                        ep.online = pl.isOnline
+                        println("Before getting max damage")
+                        ep.maxDamage = (Static.maxDamage[p.uniqueId] ?: .0).toDouble()
+                        ep.uuid = pl.uniqueId
+                        println("Before getting rank")
+                        ep.rank = Static.rankContainers[p.uniqueId]?.receive() ?: RankData("none", "non", false)
+                        println("Before getting coins")
+                        ep.coins = (Static.coins[p.uniqueId]?.receive() ?: 0).toDouble()
+                        println("Before getting armor")
+                        ep.armor = Encoder.encodeStacks(pl.inventory.armorContents)
+                        println("Before getting inventory")
+                        ep.inventory = Encoder.encodeStacks(pl.inventory.contents)
+                        println("Before getting enderchest")
+                        ep.enderChest = Encoder.encodeStacks(pl.enderChest.contents)
+                        println("Before getting skills")
+                        ep.skills = Static.skills[p.uniqueId]?.receive() ?: PlayerSkills(listOf())
+                        return@async ep
+                    } catch(e: Exception) {
+                        return@async ErrorEndpoint(500, "INTERNAL_SERVER_ERROR", e)
                     }
-                    val pl = p.player!!
-                    val ep = PlayerEndpoint(code, message, player)
-                    ep.firstJoin = pl.firstPlayed
-                    ep.lastJoin = pl.lastLogin
-                    ep.online = pl.isOnline
-                    ep.maxDamage = (Static.maxDamage[p.uniqueId] ?: .0).toDouble()
-                    ep.uuid = pl.uniqueId
-                    ep.rank = Static.rankContainers[p.uniqueId]?.receive() ?: RankData("none", "non", false)
-                    ep.coins = (Static.coins[p.uniqueId]?.receive() ?: 0).toDouble()
-                    ep.armor = Encoder.encodeStacks(pl.inventory.armorContents)
-                    ep.inventory = Encoder.encodeStacks(pl.inventory.contents)
-                    ep.enderChest = Encoder.encodeStacks(pl.enderChest.contents)
-                    ep.skills = Static.skills[p.uniqueId]?.receive() ?: PlayerSkills(listOf())
-                    return@async ep
                 }
             }.await()
         }

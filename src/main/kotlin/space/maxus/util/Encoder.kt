@@ -10,18 +10,16 @@ object Encoder {
     @JvmStatic
     fun encodeStacks(items: Array<ItemStack>) : String {
         return try {
-            run {
-                val outputStream = ByteArrayOutputStream()
-                val dataOutput = BukkitObjectOutputStream(outputStream)
-                dataOutput.writeInt(items.size)
-                for (item in items) {
-                    dataOutput.writeObject(item.serializeAsBytes())
-                }
-                dataOutput.close()
-                Base64Coder.encodeLines(outputStream.toByteArray())
+            val outputStream = ByteArrayOutputStream()
+            val dataOutput = BukkitObjectOutputStream(outputStream)
+            dataOutput.writeInt(items.size)
+            for (item in items) {
+                dataOutput.writeObject(item.serializeAsBytes())
             }
+            dataOutput.close()
+            Base64Coder.encodeLines(outputStream.toByteArray())
         } catch (e: Exception) {
-            throw Throwable("Unable to encode items!", e)
+            throw Exception("Unable to encode items!", e)
         }
     }
 }
