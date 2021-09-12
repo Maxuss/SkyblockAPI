@@ -17,7 +17,7 @@ class ConcurrentRoute<T> {
     suspend fun receive() : T {
         return coroutineScope {
             async {
-                return@async data ?: throw NullPointerException("Tried to receive data before transferring it!")
+                return@async data ?: throw IllegalStateException("Tried to receive data before transferring it!")
             }
         }.await()
     }

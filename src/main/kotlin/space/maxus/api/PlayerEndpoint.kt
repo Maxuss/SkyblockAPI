@@ -26,6 +26,17 @@ data class PlayerSkills(
         val filtered = skills.sumOf { sk -> sk.level }
         return filtered.div(skills.size.toDouble())
     }
+
+    companion object {
+        @JvmStatic
+        fun empty() : PlayerSkills {
+            val list = mutableListOf<CertainSkill>()
+            for(skill in listOf("combat", "mining", "fishing", "foraging", "farming", "alchemy", "enchanting")) {
+                list.add(CertainSkill(0, .0, skill))
+            }
+            return PlayerSkills(list)
+        }
+    }
 }
 
 data class PlayerEndpoint(
@@ -70,16 +81,20 @@ data class PlayerEndpoint(
                         ep.uuid = pl.uniqueId
                         println("Before getting rank")
                         ep.rank = Static.rankContainers[p.uniqueId]?.receive() ?: RankData("none", "non", false)
-                        println("Before getting coins")
+                        println("Before getting coins Rank: ${ep.rank?.display}")
                         ep.coins = (Static.coins[p.uniqueId]?.receive() ?: 0).toDouble()
-                        println("Before getting armor")
+                        println("Before getting armor Coins: ${ep.coins}")
                         ep.armor = Encoder.encodeStacks(pl.inventory.armorContents)
-                        println("Before getting inventory")
+                        println("Before getting inventory Armor: ${ep.armor}")
                         ep.inventory = Encoder.encodeStacks(pl.inventory.contents)
-                        println("Before getting enderchest")
+                        println("Before getting enderchest Inventory: ${ep.inventory}")
                         ep.enderChest = Encoder.encodeStacks(pl.enderChest.contents)
-                        println("Before getting skills")
-                        ep.skills = Static.skills[p.uniqueId]?.receive() ?: PlayerSkills(listOf())
+                        println("Before getting skills Ender Chest: ${ep.enderChest}")
+                        try {
+                            ep.skills = Static.skills[p.uniqueId]?.receive() ?: PlayerSkills(listOf())
+                        } catch(e: IllegalStateException) {
+                            ep.skills = PlayerSkills(listOf())
+                        }
                         return@async ep
                     } catch(e: Exception) {
                         return@async ErrorEndpoint(500, "INTERNAL_SERVER_ERROR", e)
