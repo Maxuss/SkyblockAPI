@@ -100,7 +100,7 @@ fun Application.module() {
     routing {
         get("/api/users") {
             withContext(Dispatchers.Default) {
-                val ep = Security.validateKey(call, UsersEndpoint(200, "All users that ever been on server"))
+                val ep = Security.validateKey(call, UsersEndpoint.UsersEndpoint(200, "All users that have ever been on server"))
                 call.respondText(
                     endpoint(ep),
                     contentType = ContentType.Application.Json,
@@ -113,7 +113,7 @@ fun Application.module() {
         get("/api/users/{username}") {
             withContext(Dispatchers.Default) {
                 val pep = try {
-                    PlayerEndpoint(200, "Player Information", call.parameters["username"] ?: "undefined");
+                    PlayerEndpoint.init(200, "Player Information", call.parameters["username"] ?: "undefined")
                 } catch(e: ExceptionInInitializerError) {
                     ErrorEndpoint(404, "PLAYER_NOT_JOINED_BEFORE", "This player has not yet joined your server!")
                 }
@@ -151,5 +151,9 @@ fun Application.module() {
 }
 
 suspend fun endpoint(ep: Endpoint) : String {
-    return JsonConverter.endpointJson(ep)
+    return coroutineScope {
+        async {
+            return@async JsonConverter.endpointJson(ep)
+        }
+    }.await()
 }

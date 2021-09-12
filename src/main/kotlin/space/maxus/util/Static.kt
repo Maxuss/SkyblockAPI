@@ -1,8 +1,11 @@
 package space.maxus.util
 
 import space.maxus.api.Key
+import space.maxus.api.PlayerSkills
+import space.maxus.api.RankData
 import space.maxus.api.SlayerSummary
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.util.*
 
 object Static {
@@ -14,4 +17,10 @@ object Static {
     val maxDamage = hashMapOf<UUID, BigDecimal>()
     @JvmField
     val slayerData = hashMapOf<UUID, ConcurrentRoute<SlayerSummary>>()
+    @JvmField
+    val rankContainers = hashMapOf<UUID, ConcurrentRoute<RankData>>()
+    @JvmField
+    val coins = hashMapOf<UUID, ConcurrentRoute<BigInteger>>()
+    @JvmField
+    val skills = hashMapOf<UUID, ConcurrentRoute<PlayerSkills>>()
 }
