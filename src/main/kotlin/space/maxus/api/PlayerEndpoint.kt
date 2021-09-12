@@ -49,21 +49,24 @@ data class PlayerEndpoint(
         suspend fun init(code: Int, message: String, player: String) : PlayerEndpoint {
             return coroutineScope {
                 async {
+                    println("Started getting endpoint!")
                     @Suppress("DEPRECATION") val p = Bukkit.getOfflinePlayer(player)
-                    if(!p.hasPlayedBefore() || p !is Player) {
+                    if(!p.hasPlayedBefore() || p.player == null) {
+                        println("Player didn't play before!")
                         throw ExceptionInInitializerError("Exit")
                     }
+                    val pl = p.player!!
                     val ep = PlayerEndpoint(code, message, player)
-                    ep.firstJoin = p.firstPlayed
-                    ep.lastJoin = p.lastLogin
-                    ep.online = p.isOnline
+                    ep.firstJoin = pl.firstPlayed
+                    ep.lastJoin = pl.lastLogin
+                    ep.online = pl.isOnline
                     ep.maxDamage = (Static.maxDamage[p.uniqueId] ?: .0).toDouble()
-                    ep.uuid = p.uniqueId
+                    ep.uuid = pl.uniqueId
                     ep.rank = Static.rankContainers[p.uniqueId]?.receive() ?: RankData("none", "non", false)
                     ep.coins = (Static.coins[p.uniqueId]?.receive() ?: 0).toDouble()
-                    ep.armor = Encoder.encodeStacks(p.inventory.armorContents)
-                    ep.inventory = Encoder.encodeStacks(p.inventory.contents)
-                    ep.enderChest = Encoder.encodeStacks(p.enderChest.contents)
+                    ep.armor = Encoder.encodeStacks(pl.inventory.armorContents)
+                    ep.inventory = Encoder.encodeStacks(pl.inventory.contents)
+                    ep.enderChest = Encoder.encodeStacks(pl.enderChest.contents)
                     ep.skills = Static.skills[p.uniqueId]?.receive() ?: PlayerSkills(listOf())
                     return@async ep
                 }

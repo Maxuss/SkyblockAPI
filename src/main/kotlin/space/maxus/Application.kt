@@ -116,6 +116,8 @@ fun Application.module() {
                     PlayerEndpoint.init(200, "Player Information", call.parameters["username"] ?: "undefined")
                 } catch(e: ExceptionInInitializerError) {
                     ErrorEndpoint(404, "PLAYER_NOT_JOINED_BEFORE", "This player has not yet joined your server!")
+                } catch(e: Exception) {
+                    ErrorEndpoint(500, "INTERNAL_SERVER_ERROR", "An internal server error occurred! ${e.message}")
                 }
                 val ep = Security.validateKey(
                     call,
@@ -136,6 +138,8 @@ fun Application.module() {
                     SlayerEndpoint.SlayerEndpoint(200, "Player's Slayer Data", call.parameters["username"] ?: "undefined")
                 } catch(e: ExceptionInInitializerError) {
                     ErrorEndpoint(404, "PLAYER_NOT_DONE_SLAYERS", "This player has not yet done any slayers!")
+                } catch(e: Exception) {
+                    ErrorEndpoint(500, "INTERNAL_SERVER_ERROR", "An internal server error occurred! ${e.message}")
                 }
                 val ep = Security.validateKey(
                     call,
