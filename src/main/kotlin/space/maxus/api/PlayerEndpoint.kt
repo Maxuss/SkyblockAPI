@@ -64,38 +64,29 @@ data class PlayerEndpoint(
                         println("Started getting endpoint! $username")
                         @Suppress("DEPRECATION")
                         val p = Bukkit.getOfflinePlayer(username)
-                        println("Got all players!")
                         if (!p.hasPlayedBefore() || p.player == null) {
-                            println("Player didn't play before!")
                             throw ExceptionInInitializerError("Exit")
                         }
-                        println("Player played!")
                         val pl = p.player!!
                         val ep = PlayerEndpoint(code, message, username)
-                        println("After getting endpoint")
                         ep.firstJoin = pl.firstPlayed
                         ep.lastJoin = pl.lastLogin
                         ep.online = pl.isOnline
-                        println("Before getting max damage")
                         ep.maxDamage = (Static.maxDamage[p.uniqueId] ?: .0).toDouble()
                         ep.uuid = pl.uniqueId
-                        println("Before getting rank")
                         ep.rank = Static.rankContainers[p.uniqueId]?.receive() ?: RankData("none", "non", false)
-                        println("Before getting coins Rank: ${ep.rank?.display}")
                         ep.coins = (Static.coins[p.uniqueId]?.receive() ?: 0).toDouble()
-                        println("Before getting armor Coins: ${ep.coins}")
                         ep.armor = Encoder.encodeStacks(pl.inventory.armorContents)
-                        println("Before getting inventory Armor: ${ep.armor}")
                         ep.inventory = Encoder.encodeStacks(pl.inventory.contents)
-                        println("Before getting enderchest Inventory: ${ep.inventory}")
                         ep.enderChest = Encoder.encodeStacks(pl.enderChest.contents)
-                        println("Before getting skills Ender Chest: ${ep.enderChest}")
                         try {
                             ep.skills = Static.skills[p.uniqueId]?.receive() ?: PlayerSkills(listOf())
-                        } catch(e: IllegalStateException) {
+                        } catch (e: IllegalStateException) {
                             ep.skills = PlayerSkills(listOf())
                         }
                         return@async ep
+                    } catch(e: ExceptionInInitializerError) {
+                        return@async ErrorEndpoint(404, "PLAYER_NOT_PLAYED_BEFORE", "Player has not yet played on server!")
                     } catch(e: Exception) {
                         return@async ErrorEndpoint(500, "INTERNAL_SERVER_ERROR", e)
                     } catch(e: Throwable) {

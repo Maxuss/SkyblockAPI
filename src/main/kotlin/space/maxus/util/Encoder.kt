@@ -14,7 +14,8 @@ object Encoder {
             val dataOutput = BukkitObjectOutputStream(outputStream)
             dataOutput.writeInt(items.size)
             for (item in items) {
-                dataOutput.writeObject(item.serializeAsBytes())
+                if(item != null) dataOutput.writeObject(item.serializeAsBytes())
+                else dataOutput.writeObject(null)
             }
             dataOutput.close()
             Base64Coder.encodeLines(outputStream.toByteArray())
