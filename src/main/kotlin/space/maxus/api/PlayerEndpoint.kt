@@ -46,19 +46,21 @@ data class PlayerEndpoint(
     var skills: PlayerSkills? = null
 
     companion object {
-        suspend fun init(code: Int, message: String, player: String) : Endpoint {
+        suspend fun init(code: Int, message: String, username: String) : Endpoint {
             return coroutineScope {
                 async {
                     try {
-                        println("Started getting endpoint!")
-                        @Suppress("DEPRECATION") val p = Bukkit.getOfflinePlayer(player)
+                        println("Started getting endpoint! $username")
+                        @Suppress("DEPRECATION")
+                        val p = Bukkit.getOfflinePlayer(username)
+                        println("Got all players!")
                         if (!p.hasPlayedBefore() || p.player == null) {
                             println("Player didn't play before!")
                             throw ExceptionInInitializerError("Exit")
                         }
-                        println("58")
+                        println("Player played!")
                         val pl = p.player!!
-                        val ep = PlayerEndpoint(code, message, player)
+                        val ep = PlayerEndpoint(code, message, username)
                         println("After getting endpoint")
                         ep.firstJoin = pl.firstPlayed
                         ep.lastJoin = pl.lastLogin
@@ -80,6 +82,8 @@ data class PlayerEndpoint(
                         ep.skills = Static.skills[p.uniqueId]?.receive() ?: PlayerSkills(listOf())
                         return@async ep
                     } catch(e: Exception) {
+                        return@async ErrorEndpoint(500, "INTERNAL_SERVER_ERROR", e)
+                    } catch(e: Throwable) {
                         return@async ErrorEndpoint(500, "INTERNAL_SERVER_ERROR", e)
                     }
                 }

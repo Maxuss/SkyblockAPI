@@ -117,7 +117,9 @@ fun Application.module() {
                 } catch(e: ExceptionInInitializerError) {
                     ErrorEndpoint(404, "PLAYER_NOT_JOINED_BEFORE", "This player has not yet joined your server!")
                 } catch(e: Exception) {
-                    ErrorEndpoint(500, "INTERNAL_SERVER_ERROR", "An internal server error occurred! ${e.message}")
+                    ErrorEndpoint(500, "INTERNAL_SERVER_ERROR", e)
+                } catch(e: Throwable) {
+                    ErrorEndpoint(500, "INTERNAL_SERVER_ERROR", e)
                 }
                 val ep = Security.validateKey(
                     call,
