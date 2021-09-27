@@ -3,6 +3,8 @@ package space.maxus.util
 import io.ktor.application.*
 import space.maxus.api.Endpoint
 import space.maxus.api.ErrorEndpoint
+import java.util.*
+
 
 object Security {
     @JvmStatic
@@ -16,5 +18,11 @@ object Security {
         if(Static.keys.any { k -> k.value.value == key }) return default
 
         return ErrorEndpoint(403, "FORBIDDEN", "Your API key is invalid!")
+    }
+
+    @JvmStatic
+    fun generateSID(): String {
+        val uuid = UUID.randomUUID()
+        return uuid.mostSignificantBits.toString(36) + '-' + uuid.leastSignificantBits.toString(36)
     }
 }

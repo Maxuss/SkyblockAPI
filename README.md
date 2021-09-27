@@ -14,22 +14,30 @@ Content-Type: application/json
 
 There are several endpoints for the api.
 
-* # `/`
+* # GET `/`
 Contains this page.
 Does not require API key.
 
-* # `/api`
+* # GET `/api`
 Main endpoint, contains info about all other endpoints for the API.
 Does not require API key.
 
-* # `/api/users`
+* # GET `/api/users`
 Contains all users that played on your server, 
 their UUIDs and some more information about them.
 
-* # `/api/users/{username}`
+* # GET `/api/users/{username}`
 Replace `{username}` with username of user that played on the server already.
 Provides skyblock-related information on the user.
 
-* # `/api/slayers/{username}`
+* # GET `/api/slayers/{username}`
 Replace `{username}` with username of user that played on the server already.
 Provides slayer-related information on the user.
+
+* # POST `/api/itemdata/`
+Used to post hashed item data, to be converted into item later
+Successful response contains UUID of the item stored.
+Note that the item will be removed in 10 minutes after creation.
+
+* # GET `/api/itemdata/{uuid}`
+Used to get hashed item data from uuid.

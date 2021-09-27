@@ -8,6 +8,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
 
+
 object Static {
     @JvmField
     val allPlayers = listOf<UUID>()
@@ -23,4 +24,10 @@ object Static {
     val coins = hashMapOf<UUID, ConcurrentRoute<BigInteger>>()
     @JvmField
     val skills = hashMapOf<UUID, ConcurrentRoute<PlayerSkills>>()
+
+    @JvmField
+    val itembin = hashMapOf<String, String>()
+
+    @JvmField
+    var COMMON_API_KEY: Key = Key.generate(UUID.randomUUID())
 }

@@ -2,15 +2,14 @@
 
 package space.maxus
 
+import com.google.gson.reflect.TypeToken
 import io.ktor.application.*
-import io.ktor.client.utils.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.netty.*
-import io.ktor.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -19,18 +18,19 @@ import space.maxus.api.*
 import space.maxus.json.JsonConverter
 import space.maxus.util.Pages
 import space.maxus.util.Security
+import space.maxus.util.Static
 import java.util.*
+import kotlin.concurrent.schedule
 
 suspend fun main(args: Array<String>) {
-    val example = Key.generate(UUID.randomUUID())
-    println("Example key: ${example.value}")
+    println("Common key: ${Static.COMMON_API_KEY.value}")
     coroutineScope {
         async { EngineMain.main(args) }
     }
 }
 
 fun Application.module() {
-
+    install(ContentNegotiation)
     install(CORS) {
         anyHost()
         method(HttpMethod.Options)
@@ -128,6 +128,7 @@ fun Application.module() {
                 call.respondText(
                     endpoint(ep),
                     contentType = ContentType.Application.Json,
+                    status = HttpStatusCode.OK
                 )
             }
         }
@@ -151,6 +152,57 @@ fun Application.module() {
                     endpoint(ep),
                     contentType = ContentType.Application.Json,
                 )
+            }
+        }
+    }
+
+    routing {
+        get("/api/itemdata/{uuid}") {
+            withContext(Dispatchers.Default) {
+                val itemep = try {
+                    ItemDataEndpoint(call.parameters["uuid"] ?: throw ExceptionInInitializerError("UUID not specified!"), Static.itembin[call.parameters["uuid"]] ?: throw ExceptionInInitializerError("This item is not stored!"), 200, "Item stored under provided UUID was found.")
+                } catch(e: ExceptionInInitializerError) {
+                    ErrorEndpoint(404, "ITEM_NOT_STORED", e.message?:"Error occurred!")
+                } catch(e: Exception) {
+                    ErrorEndpoint(500, "INTERNAL_SERVER_ERROR", "An internal server error occurred! ${e.message}")
+                }
+                val ep = Security.validateKey(
+                    call,
+                    itemep
+                )
+                call.respondText(endpoint(ep), contentType = ContentType.Application.Json)
+            }
+        }
+
+        post("/api/itemdata") {
+
+            withContext(Dispatchers.Default) {
+                try {
+                    val item = JsonConverter.gson.fromJson<ExpectedItemData>(call.receiveText(), object: TypeToken<ExpectedItemData>() { }.type)
+                    val uuid = Security.generateSID()
+                    Static.itembin[uuid] = item.data
+                    call.respondText(
+                        endpoint(
+                            ItemDataEndpoint(
+                                uuid,
+                                item.data,
+                                200,
+                                "Successfully stored item data inside server API!"
+                            )
+                        ),
+                        contentType = ContentType.Application.Json
+                    )
+                    Timer().schedule(10 * 60 * 1000L) {
+                        Static.itembin.remove(uuid)
+                    }
+                } catch(e: Exception) {
+                    call.respondText(
+                        endpoint(
+                            ErrorEndpoint(500, "Internal server error occurred", e)
+                        ),
+                        contentType = ContentType.Application.Json,
+                    )
+                }
             }
         }
     }
