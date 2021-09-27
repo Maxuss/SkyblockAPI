@@ -12,7 +12,7 @@ data class Key(val owner: UUID, val value: String) {
             val r = ByteArray(24)
             random.nextBytes(r)
             val s: String = Base64.getUrlEncoder().encodeToString(r).replace("_", "G").replace("=", "F")
-            val key = Key(owner, s)
+            val key = Key(owner, s.replace("-", ""))
             Static.keys[owner] = key
             return key
         }

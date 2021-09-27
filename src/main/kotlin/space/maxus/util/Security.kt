@@ -23,6 +23,6 @@ object Security {
     @JvmStatic
     fun generateSID(): String {
         val uuid = UUID.randomUUID()
-        return uuid.mostSignificantBits.toString(36) + '-' + uuid.leastSignificantBits.toString(36)
+        return (uuid.mostSignificantBits.toString(36) + uuid.leastSignificantBits.toString(36)).replace("-", "")
     }
 }
